@@ -1,0 +1,56 @@
+import { Body, Controller, Get, Logger, Param, Post, Put, Query, UsePipes, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ClientProxy, ClientProxyFactory, Transport } from '@nestjs/microservices';
+import { Observable } from 'rxjs';
+import { AtualizarCategoriaDto } from './dtos/atualiza-categoria.dto';
+import { CriarCategoriaDto } from './dtos/criar-categoria.dto';
+
+@Controller('/api/v1/categorias')
+export class CategoriasController {
+    private clientAdminBackend: ClientProxy;
+    private configService: ConfigService;
+
+    constructor(configService: ConfigService) {
+        this.configService = configService;
+        let amqpUrl = 'amqp://';
+        amqpUrl += `${this.configService.get<string>('RABBITMQ_USER')}:`;
+        amqpUrl += this.configService.get<string>('RABBITMQ_PASS');
+        amqpUrl += `@${this.configService.get<string>('RABBITMQ_HOST')}`;
+        amqpUrl += `:${this.configService.get<string>('RABBITMQ_PORT')}/smartranking`;
+    
+        this.clientAdminBackend = ClientProxyFactory.create({
+          transport: Transport.RMQ,
+          options:{
+            urls: [amqpUrl],
+            queue: 'admin-backend'
+          }
+        });
+    }
+
+    @Post('')
+    @UsePipes(ValidationPipe)
+    async criarCategoria(
+      @Body() criarCategoriaDto: CriarCategoriaDto
+    ) {
+      this.clientAdminBackend.emit('criar-categoria', criarCategoriaDto);
+    }
+  
+    @Get('')
+    consultarCategorias(@Query('idCategoria') id: CriarCategoriaDto) : Observable<any>
+    {
+      return this.clientAdminBackend.send('consultar-categorias', id ? id : '');
+    }
+  
+    @Put('/:id')
+    @UsePipes(ValidationPipe)
+    atualizarCategoria(
+      @Body() atualizarCategoriaDto: AtualizarCategoriaDto,
+      @Param('id') id: string
+    ) {
+      this.clientAdminBackend.emit('atualizar-categoria', {
+        id,
+        categoria: atualizarCategoriaDto
+      });
+    }
+
+}
