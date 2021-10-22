@@ -2,29 +2,16 @@ import { Body, Controller, Get, Logger, Param, Post, Put, Query, UsePipes, Valid
 import { ConfigService } from '@nestjs/config';
 import { ClientProxy, ClientProxyFactory, Transport } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
+import { ClientAdminBackendService } from 'src/common/infrastructure/services/client-admin-backend.service';
 import { AtualizarCategoriaDto } from './dtos/atualiza-categoria.dto';
 import { CriarCategoriaDto } from './dtos/criar-categoria.dto';
 
 @Controller('/api/v1/categorias')
 export class CategoriasController {
-    private clientAdminBackend: ClientProxy;
-    private configService: ConfigService;
+    private readonly clientAdminBackendService: ClientAdminBackendService;
 
-    constructor(configService: ConfigService) {
-        this.configService = configService;
-        let amqpUrl = 'amqp://';
-        amqpUrl += `${this.configService.get<string>('RABBITMQ_USER')}:`;
-        amqpUrl += this.configService.get<string>('RABBITMQ_PASS');
-        amqpUrl += `@${this.configService.get<string>('RABBITMQ_HOST')}`;
-        amqpUrl += `:${this.configService.get<string>('RABBITMQ_PORT')}/smartranking`;
-    
-        this.clientAdminBackend = ClientProxyFactory.create({
-          transport: Transport.RMQ,
-          options:{
-            urls: [amqpUrl],
-            queue: 'admin-backend'
-          }
-        });
+    constructor(clientAdminBackendService: ClientAdminBackendService) {
+        this.clientAdminBackendService = clientAdminBackendService;
     }
 
     @Post('')
@@ -32,13 +19,13 @@ export class CategoriasController {
     async criarCategoria(
       @Body() criarCategoriaDto: CriarCategoriaDto
     ) {
-      this.clientAdminBackend.emit('criar-categoria', criarCategoriaDto);
+      this.clientAdminBackendService.client().emit('criar-categoria', criarCategoriaDto);
     }
   
     @Get('')
     consultarCategorias(@Query('idCategoria') id: CriarCategoriaDto) : Observable<any>
     {
-      return this.clientAdminBackend.send('consultar-categorias', id ? id : '');
+      return this.clientAdminBackendService.client().send('consultar-categorias', id ? id : '');
     }
   
     @Put('/:id')
@@ -47,7 +34,7 @@ export class CategoriasController {
       @Body() atualizarCategoriaDto: AtualizarCategoriaDto,
       @Param('id') id: string
     ) {
-      this.clientAdminBackend.emit('atualizar-categoria', {
+      this.clientAdminBackendService.client().emit('atualizar-categoria', {
         id,
         categoria: atualizarCategoriaDto
       });
