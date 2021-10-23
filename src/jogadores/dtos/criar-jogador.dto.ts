@@ -12,6 +12,5 @@ export class CriarJogadorDto
     readonly nome: string;
     
     @IsNotEmpty()
-    @IsMongoId()
     readonly categoria: string
 }
