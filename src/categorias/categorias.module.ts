@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { ClientAdminBackendService } from 'src/common/infrastructure/services/client-admin-backend.service';
+import { ClientAdminBackendService } from 'src/infrastructure/services/client-admin-backend.service';
 import { CategoriasController } from './categorias.controller';
 
 @Module({

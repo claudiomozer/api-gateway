@@ -1,8 +1,6 @@
-import { Body, Controller, Get, Logger, Param, Post, Put, Query, UsePipes, ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { ClientProxy, ClientProxyFactory, Transport } from '@nestjs/microservices';
+import { Body, Controller, Get, Param, Post, Put, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { ClientAdminBackendService } from 'src/common/infrastructure/services/client-admin-backend.service';
+import { ClientAdminBackendService } from 'src/infrastructure/services/client-admin-backend.service';
 import { AtualizarCategoriaDto } from './dtos/atualiza-categoria.dto';
 import { CriarCategoriaDto } from './dtos/criar-categoria.dto';
 
