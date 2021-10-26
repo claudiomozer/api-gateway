@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { lastValueFrom } from 'rxjs';
 import { ClientAdminBackendService } from 'src/infrastructure/services/client-admin-backend.service';
 import { ClientDesafiosService } from 'src/infrastructure/services/client-desafios.service';
@@ -59,5 +59,23 @@ export class DesafiosController
         }
 
         this.clientDesafiosService.client().emit('criar-desafio', { desafio: criarDesafioDto });
+    }
+
+    @Get('/:jogador?')
+    async consultarDesafios(
+        @Param('jogador') jogador: string
+    ) {
+
+        if (jogador) {
+            let jogadorEncontrado = this.clientAdminBackendService.client().send('consultar-jogadores', jogador);
+            jogadorEncontrado = await lastValueFrom(jogadorEncontrado);
+
+            if ('error' in jogadorEncontrado) {
+                throw new BadRequestException(`O jogador ${jogador} não foi encontrado`);
+            }
+
+            
+        }
+        return this.clientDesafiosService.client().send('consultar-desafios', jogador ? jogador : '');
     }
 }
