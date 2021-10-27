@@ -1,9 +1,10 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, UsePipes, ValidationPipe } from '@nestjs/common';
 import { IoTJobsDataPlane } from 'aws-sdk';
 import { lastValueFrom } from 'rxjs';
 import { ValidacaoParametrosPipe } from 'src/common/pipes/validacao-parametros.pipe';
 import { ClientAdminBackendService } from 'src/infrastructure/services/client-admin-backend.service';
 import { ClientDesafiosService } from 'src/infrastructure/services/client-desafios.service';
+import { AtribuirPartidaDesafioDto } from './dtos/atribuir-partida-desafio.dto';
 import { AtualizarDesafioDto } from './dtos/atualizar-desafio.dto';
 import { CriarDesafioDto } from './dtos/criar-desafio-dto';
 
@@ -21,7 +22,8 @@ export class DesafiosController
         this.clientDesafiosService = clientDesafiosService;
     }
 
-    @Post('')
+    @Post()
+    @UsePipes(ValidationPipe)
     async criarDesafio (
         @Body() criarDesafioDto: CriarDesafioDto
     ) {
@@ -81,12 +83,13 @@ export class DesafiosController
     }
 
     @Put('/:id')
+    @UsePipes(ValidationPipe)
     async atualizarDesafio (
         @Body() atualizarDesafioDto: AtualizarDesafioDto,
         @Param('id', ValidacaoParametrosPipe) id: string
     ) {
         // toDo validações que serão possíveis depois de criar o micro-desafios
-        this.clientDesafiosService.client().emit('atualizar-jogador', {id, desafio: AtualizarDesafioDto});
+        this.clientDesafiosService.client().emit('atualizar-desafio', {id, desafio: AtualizarDesafioDto});
     }
 
     @Delete('/:id')
@@ -94,6 +97,24 @@ export class DesafiosController
         @Param('id', ValidacaoParametrosPipe) id: string
     ) {
         // toDo validações que serão possíveis depois de criar o micro-desafios
-        this.clientDesafiosService.client().emit('deletar-jogador', id);
+        this.clientDesafiosService.client().emit('deletar-desafio', id);
+    }
+
+    @Put('/:id/partida')
+    @UsePipes(ValidationPipe)
+    async atribuirPartidaDesafio (
+        @Body() atribuirPartidaDesafioDto: AtribuirPartidaDesafioDto,
+        @Param('id', ValidacaoParametrosPipe) id: string
+    ) {
+        const {def} = atribuirPartidaDesafioDto;
+        let jogadorEncontrado = this.clientAdminBackendService.client().send('consultar-jogadores', def._id);
+        jogadorEncontrado = await lastValueFrom(jogadorEncontrado);
+
+        if ('error' in jogadorEncontrado) {
+            throw new BadRequestException(`O jogador ${def._id} não foi encontrado`);
+        }
+
+        // toDo validações que serão possíveis depois de criar o micro-desafios
+        this.clientDesafiosService.client().emit('atribuir-partida-desafio', { id, atribuirPartidaDesafioDto});
     }
 }
