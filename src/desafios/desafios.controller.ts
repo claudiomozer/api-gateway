@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { IoTJobsDataPlane } from 'aws-sdk';
 import { lastValueFrom } from 'rxjs';
 import { ValidacaoParametrosPipe } from 'src/common/pipes/validacao-parametros.pipe';
@@ -86,6 +86,14 @@ export class DesafiosController
         @Param('id', ValidacaoParametrosPipe) id: string
     ) {
         // toDo validações que serão possíveis depois de criar o micro-desafios
-        this.clientDesafiosService.client().emit('atualizar-jogaodor', {id, desafio: AtualizarDesafioDto});
+        this.clientDesafiosService.client().emit('atualizar-jogador', {id, desafio: AtualizarDesafioDto});
+    }
+
+    @Delete('/:id')
+    async deletarDesafio (
+        @Param('id', ValidacaoParametrosPipe) id: string
+    ) {
+        // toDo validações que serão possíveis depois de criar o micro-desafios
+        this.clientDesafiosService.client().emit('deletar-jogador', id);
     }
 }
