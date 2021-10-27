@@ -1,7 +1,10 @@
-import { BadRequestException, Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { IoTJobsDataPlane } from 'aws-sdk';
 import { lastValueFrom } from 'rxjs';
+import { ValidacaoParametrosPipe } from 'src/common/pipes/validacao-parametros.pipe';
 import { ClientAdminBackendService } from 'src/infrastructure/services/client-admin-backend.service';
 import { ClientDesafiosService } from 'src/infrastructure/services/client-desafios.service';
+import { AtualizarDesafioDto } from './dtos/atualizar-desafio.dto';
 import { CriarDesafioDto } from './dtos/criar-desafio-dto';
 
 @Controller('api/v1/desafios')
@@ -72,10 +75,17 @@ export class DesafiosController
 
             if ('error' in jogadorEncontrado) {
                 throw new BadRequestException(`O jogador ${jogador} não foi encontrado`);
-            }
-
-            
+            }            
         }
         return this.clientDesafiosService.client().send('consultar-desafios', jogador ? jogador : '');
+    }
+
+    @Put('/:id')
+    async atualizarDesafio (
+        @Body() atualizarDesafioDto: AtualizarDesafioDto,
+        @Param('id', ValidacaoParametrosPipe) id: string
+    ) {
+        // toDo validações que serão possíveis depois de criar o micro-desafios
+        this.clientDesafiosService.client().emit('atualizar-jogaodor', {id, desafio: AtualizarDesafioDto});
     }
 }
