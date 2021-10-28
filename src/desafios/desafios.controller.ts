@@ -47,8 +47,8 @@ export class DesafiosController
             throw new BadRequestException("Todos os jogadores devem pertencer à categoria informada");
         }
 
-        let categoriaEncontrada = this.clientAdminBackendService.client().send('consultar-categorias', categoria);
-        categoriaEncontrada = await lastValueFrom(categoriaEncontrada);
+        let categoriaEncontradaOberver = this.clientAdminBackendService.client().send('consultar-categorias', categoria);
+        let categoriaEncontrada = await lastValueFrom(categoriaEncontradaOberver);
         if ('error' in categoriaEncontrada) {
             throw new BadRequestException('A categoria informada não existe');
         }
@@ -63,7 +63,8 @@ export class DesafiosController
             throw new BadRequestException('Um dos jogadores informados não foi cadastrado');
         }
 
-        this.clientDesafiosService.client().emit('criar-desafio', { desafio: criarDesafioDto });
+        criarDesafioDto.categoria = categoriaEncontrada._id;
+        this.clientDesafiosService.client().emit('criar-desafio',criarDesafioDto );
     }
 
     @Get('/:jogador?')
