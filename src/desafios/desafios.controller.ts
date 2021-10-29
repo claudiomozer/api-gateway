@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, UsePipes, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { IoTJobsDataPlane } from 'aws-sdk';
 import { lastValueFrom } from 'rxjs';
 import { ValidacaoParametrosPipe } from 'src/common/pipes/validacao-parametros.pipe';
@@ -67,9 +67,10 @@ export class DesafiosController
         this.clientDesafiosService.client().emit('criar-desafio',criarDesafioDto );
     }
 
-    @Get('/:jogador?')
+    @Get('')
     async consultarDesafios(
-        @Param('jogador') jogador: string
+        @Query('jogador') jogador: string,
+        @Query('id') id: string
     ) {
 
         if (jogador) {
@@ -80,7 +81,11 @@ export class DesafiosController
                 throw new BadRequestException(`O jogador ${jogador} não foi encontrado`);
             }            
         }
-        return this.clientDesafiosService.client().send('consultar-desafios', jogador ? jogador : '');
+        const payload = {
+            jogador: jogador ? jogador : '',
+            id: id ? id : ''
+        }
+        return this.clientDesafiosService.client().send('consultar-desafios', payload);
     }
 
     @Put('/:id')
