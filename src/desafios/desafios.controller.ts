@@ -113,7 +113,14 @@ export class DesafiosController
     async deletarDesafio (
         @Param('id', ValidacaoParametrosPipe) id: string
     ) {
-        // toDo validações que serão possíveis depois de criar o micro-desafios
+        const desafioEncontradoObserver = this.clientDesafiosService.client().send('consultar-desafios', { id });
+        const desafioEncontrado = await lastValueFrom(desafioEncontradoObserver);
+
+        console.log(desafioEncontrado)
+        if (!desafioEncontrado) {
+            throw new NotFoundException(`O desafio ${id} não foi encontrado`);
+        }
+
         this.clientDesafiosService.client().emit('deletar-desafio', id);
     }
 
