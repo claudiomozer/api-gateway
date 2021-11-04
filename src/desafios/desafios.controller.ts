@@ -97,7 +97,6 @@ export class DesafiosController
         const desafioEncontradoObserver = this.clientDesafiosService.client().send('consultar-desafios', { id });
         const desafioEncontrado = await lastValueFrom(desafioEncontradoObserver);
 
-        console.log(desafioEncontrado)
         if (!desafioEncontrado) {
             throw new NotFoundException(`O desafio ${id} não foi encontrado`);
         }
@@ -116,7 +115,6 @@ export class DesafiosController
         const desafioEncontradoObserver = this.clientDesafiosService.client().send('consultar-desafios', { id });
         const desafioEncontrado = await lastValueFrom(desafioEncontradoObserver);
 
-        console.log(desafioEncontrado)
         if (!desafioEncontrado) {
             throw new NotFoundException(`O desafio ${id} não foi encontrado`);
         }
@@ -138,7 +136,21 @@ export class DesafiosController
             throw new BadRequestException(`O jogador ${def._id} não foi encontrado`);
         }
 
-        // toDo validações que serão possíveis depois de criar o micro-desafios
-        this.clientDesafiosService.client().emit('atribuir-partida-desafio', { id, atribuirPartidaDesafioDto});
+        const desafioEncontradoObserver = this.clientDesafiosService.client().send('consultar-desafios', { id });
+        const desafioEncontrado = await lastValueFrom(desafioEncontradoObserver);
+
+        if (!desafioEncontrado) {
+            throw new NotFoundException(`O desafio ${id} não foi encontrado`);
+        }
+
+        if (desafioEncontrado.status === DesafioStatus.REALIZADO) {
+            throw new BadRequestException(`Este desafio já foi realizado`);
+        }
+
+        if (desafioEncontrado.status !== DesafioStatus.ACEITO) {
+            throw new BadRequestException(`Somente desafios ACEITOS podem ser atualizados`);
+        }
+
+        this.clientDesafiosService.client().emit('atribuir-partida-desafio', { id, partida: atribuirPartidaDesafioDto});
     }
 }
