@@ -1,5 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, UsePipes, ValidationPipe } from '@nestjs/common';
-import { IoTJobsDataPlane } from 'aws-sdk';
+import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { lastValueFrom } from 'rxjs';
 import { ValidacaoParametrosPipe } from 'src/common/pipes/validacao-parametros.pipe';
 import { ClientAdminBackendService } from 'src/infrastructure/services/client-admin-backend.service';
@@ -7,6 +6,7 @@ import { ClientDesafiosService } from 'src/infrastructure/services/client-desafi
 import { AtribuirPartidaDesafioDto } from './dtos/atribuir-partida-desafio.dto';
 import { AtualizarDesafioDto } from './dtos/atualizar-desafio.dto';
 import { CriarDesafioDto } from './dtos/criar-desafio-dto';
+import { DesafioStatus } from './interfaces/desafio-status.enum';
 
 @Controller('api/v1/desafios')
 export class DesafiosController 
@@ -94,8 +94,19 @@ export class DesafiosController
         @Body() atualizarDesafioDto: AtualizarDesafioDto,
         @Param('id', ValidacaoParametrosPipe) id: string
     ) {
-        // toDo validações que serão possíveis depois de criar o micro-desafios
-        this.clientDesafiosService.client().emit('atualizar-desafio', {id, desafio: AtualizarDesafioDto});
+        const desafioEncontradoObserver = this.clientDesafiosService.client().send('consultar-desafios', { id });
+        const desafioEncontrado = await lastValueFrom(desafioEncontradoObserver);
+
+        console.log(desafioEncontrado)
+        if (!desafioEncontrado) {
+            throw new NotFoundException(`O desafio ${id} não foi encontrado`);
+        }
+
+        if (desafioEncontrado.status !== DesafioStatus.PENDENTE) {
+            throw new BadRequestException(`Somente desafios PENDENTES podem ser atualizados`);
+        }
+
+        this.clientDesafiosService.client().emit('atualizar-desafio', {id, desafio: atualizarDesafioDto});
     }
 
     @Delete('/:id')
