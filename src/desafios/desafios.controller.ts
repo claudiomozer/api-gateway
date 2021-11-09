@@ -129,11 +129,11 @@ export class DesafiosController
         @Param('id', ValidacaoParametrosPipe) id: string
     ) {
         const {def} = atribuirPartidaDesafioDto;
-        let jogadorEncontrado = this.clientAdminBackendService.client().send('consultar-jogadores', def._id);
+        let jogadorEncontrado = this.clientAdminBackendService.client().send('consultar-jogadores', def);
         jogadorEncontrado = await lastValueFrom(jogadorEncontrado);
 
         if ('error' in jogadorEncontrado) {
-            throw new BadRequestException(`O jogador ${def._id} não foi encontrado`);
+            throw new BadRequestException(`O jogador ${def} não foi encontrado`);
         }
 
         const desafioEncontradoObserver = this.clientDesafiosService.client().send('consultar-desafios', { id });
