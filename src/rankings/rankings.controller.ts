@@ -1,16 +1,17 @@
 import { BadRequestException, Controller, Get, Query } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { ClientRankingsService } from 'src/infrastructure/services/client-rankings.service';
+import { RankingsService } from './rankings.service';
 
 @Controller('api/v1/rankings')
 export class RankingsController
 {
 
-    private readonly clientRankingsService: ClientRankingsService;
+    private readonly rankingsService: RankingsService;
 
-    constructor (clientRankingsService: ClientRankingsService)
+    constructor (rankingsService: RankingsService)
     {
-        this.clientRankingsService = clientRankingsService;
+        this.rankingsService = rankingsService;
     }
 
     @Get()
@@ -19,11 +20,7 @@ export class RankingsController
         @Query('dataRef') dataRef: string
     ) : Observable<any>
     {
-        if (!idCategoria) {
-            throw new BadRequestException("O id da Categoria é obrigatório");
-        }
-
-        return this.clientRankingsService.client().send('consultar-rankings', {idCategoria, dataRef: (dataRef ? dataRef : '')});
+        return this.rankingsService.consultarRankings(idCategoria, dataRef);
     }
 
 }
