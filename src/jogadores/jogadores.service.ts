@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { lastValueFrom, Observable } from 'rxjs';
-import { AwsService } from 'src/infrastructure/services/aws.service';
+import { AwsS3Service } from 'src/infrastructure/services/aws-s3.service';
 import { ClientAdminBackendService } from 'src/infrastructure/services/client-admin-backend.service';
 import { AtualizarJogadorDto } from './dtos/atualizar-jogador.dto';
 import { CriarJogadorDto } from './dtos/criar-jogador.dto';
@@ -9,14 +9,14 @@ import { CriarJogadorDto } from './dtos/criar-jogador.dto';
 export class JogadoresService
 {
     private readonly clientAdminBackendService: ClientAdminBackendService;
-    private readonly awsService: AwsService;
+    private readonly awsS3Service: AwsS3Service;
 
     constructor(
         clientAdminBackendService: ClientAdminBackendService,
-        awsService: AwsService
+        awsS3Service: AwsS3Service
     ) {
         this.clientAdminBackendService = clientAdminBackendService;
-        this.awsService = awsService;
+        this.awsS3Service = awsS3Service;
     }
 
     async criarJogador ( criarJogadorDto: CriarJogadorDto ) {
@@ -62,7 +62,7 @@ export class JogadoresService
             throw new BadRequestException('O jogaodor informado não existe');
         }
 
-        const urlFotoJogador = await this.awsService.uploadArquivo(file, id);
+        const urlFotoJogador = await this.awsS3Service.uploadArquivo(file, id);
         
         const atualizarjogadorDto: AtualizarJogadorDto = {};
         atualizarjogadorDto.urlFotoJogador = urlFotoJogador.url;
