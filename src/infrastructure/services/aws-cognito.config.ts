@@ -15,7 +15,7 @@ export class AwsCognitoConfig
         this.configService = configService;
         this.userPoolId = this.configService.get<string>('COGNITO_USER_POOL');
         this.clientId = this.configService.get<string>('COGNITO_CLIENT_ID');
-        this.region = this.configService.get<string>('AWS_DEFAULT_REGION');
+        this.region = this.configService.get<string>('AWS_AUTH_REGION');
         this.authority = `https://cognito-idp.${this.region}.amazonaws.com/${this.userPoolId}`;
     }
 

@@ -1,4 +1,5 @@
-import { BadRequestException, Controller, Get, Query } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
 import { ClientRankingsService } from 'src/infrastructure/services/client-rankings.service';
 import { RankingsService } from './rankings.service';
@@ -14,6 +15,7 @@ export class RankingsController
         this.rankingsService = rankingsService;
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Get()
     consultarRankings (
         @Query('idCategoria') idCategoria: string,

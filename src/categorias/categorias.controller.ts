@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Param, Post, Put, Query, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
 import { CategoriasService } from './categorias.service';
 import { AtualizarCategoriaDto } from './dtos/atualiza-categoria.dto';
@@ -12,6 +13,7 @@ export class CategoriasController {
         this.categoriasService = categoriasService;
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Post('')
     @UsePipes(ValidationPipe)
     criarCategoria (
@@ -20,12 +22,14 @@ export class CategoriasController {
         this.categoriasService.criarCategoria(criarCategoriaDto);
     }
   
+    @UseGuards(AuthGuard('jwt'))
     @Get('')
     consultarCategorias(@Query('idCategoria') id: CriarCategoriaDto)
     {
         return this.categoriasService.consultarCategorias(id);
     }
   
+    @UseGuards(AuthGuard('jwt'))
     @Put('/:id')
     @UsePipes(ValidationPipe)
     atualizarCategoria(
